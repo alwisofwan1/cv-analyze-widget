@@ -151,6 +151,7 @@
         .header-left {
           display: flex;
           align-items: center;
+          user-select: none;
         }
             
         .header-close {
@@ -175,6 +176,9 @@
           padding: 20px;
           background: linear-gradient(180deg, #f8fafc, #f1f5f9);
           scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch; /* Untuk iOS */
+          overscroll-behavior: contain;
+          position: relative;
         }
 
         .widget-message {
@@ -182,9 +186,22 @@
           max-width: 85%;
           padding: 12px 16px;
           border-radius: 16px;
-          line-height: 1.5;
-          animation: messagePopIn 0.3s ease-out;
+          line-height: 1.6;
           position: relative;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          visibility: visible !important;
+        }
+
+          @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @keyframes messagePopIn {
@@ -199,10 +216,43 @@
         }
 
         .widget-message.bot {
-          background: var(--background-color);
-          color: var(--text-color);
+         background: var(--background-color);
+          color: var(--text-color) !important;
           border-bottom-left-radius: 4px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              }
+
+                .widget-message.bot strong {
+          color: var(--primary-color);
+          font-weight: 600;
+          display: inline-block;
+          margin: 2px 0;
+        }
+
+        .widget-message.bot em {
+          color: var(--secondary-color);
+          font-style: italic;
+        }
+
+
+        /* Styling untuk numbered lists */
+        .widget-message.bot p {
+          margin: 8px 0;
+        }
+
+        .widget-message.bot br {
+          display: block;
+          content: "";
+          margin-top: 8px;
+        }
+
+        /* Spacing untuk numbered items */
+        .widget-message.bot strong:first-child {
+          margin-top: 12px;
+        }
+
+        /* Indentation untuk numbered lists */
+        .widget-message.bot {
+          padding-left: 20px;
         }
 
         .widget-message.user {
@@ -214,20 +264,20 @@
         }
 
         #cv-analysis-widget-input-area {
-          padding: 15px;
+          padding: 10px;
           background: var(--background-color);
           border-top: 1px solid #e5e7eb;
         }
 
         #cv-analysis-widget-file-upload {
-          padding: 12px;
-          margin-bottom: 12px;
+          padding: 7px;
+          margin-bottom: 10px;
           background: #f8fafc;
-          border: 2px dashed #cbd5e1;
+          border: 1px dashed #cbd5e1;
           border-radius: 12px;
           text-align: center;
           cursor: pointer;
-          font-size: 14px;
+          font-size: 13px;
           color: var(--light-text-color);
           transition: all 0.3s ease;
         }
@@ -246,11 +296,11 @@
 
         #cv-analysis-widget-input {
           flex: 1;
-          padding: 12px 16px;
+          padding: 8px 10px;
           border: 2px solid #e2e8f0;
           border-radius: 12px;
           outline: none;
-          font-size: 14px;
+          font-size: 13px;
           transition: all 0.3s ease;
         }
 
@@ -436,6 +486,7 @@
             transform: rotate(90deg);
           }
         }
+      }
       `;
       return style;
     },
@@ -486,7 +537,7 @@
 
       const fileInput = DOM.create('input');
       fileInput.type = 'file';
-      fileInput.accept = '.pdf,.doc,.docx';
+      fileInput.accept = '.pdf';
       fileInput.style.display = 'none';
 
       // Create input container
@@ -554,6 +605,8 @@
 
       // Create widget elements
       this.elements = WidgetUI.createWidgetStructure();
+
+      // this.setupScrollObserver();
 
       // Check if we're in embedded mode
       const targetElement = DOM.get(CONFIG.widgetId);
@@ -668,32 +721,72 @@
     addMessage(type, content) {
       const message = DOM.create('div', null, `widget-message ${type}`);
 
-      // Typing effect for bot messages
       if (type === 'bot') {
-        message.style.opacity = '0';
-        let i = 0;
-        const text = content;
-        message.textContent = '';
+        message.style.opacity = '1';
         this.elements.messages.appendChild(message);
 
+        if (!content) {
+          message.textContent = 'No response received';
+          this.scrollToBottom();
+          return;
+        }
+
+        // Format the content first
+        const formattedContent = this.formatBotResponse(content);
+        const paragraphs = formattedContent.split('\n');
+        let currentParagraph = 0;
+        let currentChar = 0;
+        let currentText = '';
+
         const typeWriter = () => {
-          if (i < text.length) {
-            message.textContent += text.charAt(i);
-            i++;
-            setTimeout(typeWriter, 20);
+          if (!paragraphs || paragraphs.length === 0) {
+            message.innerHTML = formattedContent;
+            return;
+          }
+
+          if (currentParagraph < paragraphs.length) {
+            const currentParagraphText = paragraphs[currentParagraph];
+
+            if (currentChar < currentParagraphText.length) {
+              currentText += currentParagraphText[currentChar];
+              message.innerHTML = currentText;
+              currentChar++;
+
+              // this.scrollToBottom();
+              requestAnimationFrame(() => setTimeout(typeWriter, 5));
+            } else {
+              // Add line break if not last paragraph
+              if (currentParagraph < paragraphs.length - 1) {
+                currentText += '<br>';
+              }
+              currentParagraph++;
+              currentChar = 0;
+              requestAnimationFrame(() => setTimeout(typeWriter, 5));
+            }
           }
         };
 
-        setTimeout(() => {
-          message.style.opacity = '1';
-          typeWriter();
-        }, 200);
+        requestAnimationFrame(typeWriter);
       } else {
-        message.textContent = content;
+        message.textContent = content || 'No message';
         this.elements.messages.appendChild(message);
+        // this.scrollToBottom();
       }
+    },
 
-      this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
+    // Fungsi scroll yang lebih sederhana dan efektif
+    scrollToBottom() {
+      const messages = this.elements.messages;
+      messages.scrollTop = messages.scrollHeight;
+    },
+
+    setupScrollObserver() {
+      const messages = this.elements.messages;
+      const observer = new ResizeObserver(() => {
+        this.scrollToBottom();
+      });
+
+      observer.observe(messages);
     },
 
     showLoading() {
@@ -723,35 +816,34 @@
         const file = e.target.files[0];
         this.addMessage('user', `Uploaded: ${file.name}`);
 
-        // Simulate CV analysis
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('prompt', 'Analyze this resume');
+
         this.showLoading();
 
-        setTimeout(() => {
-          this.hideLoading();
-
-          const fileExtension = file.name.split('.').pop().toLowerCase();
-          let analysis = '';
-
-          if (
-            fileExtension === 'pdf' ||
-            fileExtension === 'docx' ||
-            fileExtension === 'doc'
-          ) {
-            analysis = `I've analyzed your CV (${file.name}) and here are my findings:
-            
-1. Your CV appears to be in a standard format.
-2. For better results, ensure you have clear sections for:
-   - Professional experience
-   - Education
-   - Skills
-   - Contact information
-3. Is there anything specific you'd like me to help with regarding your CV?`;
-          } else {
-            analysis = `The file you uploaded (${file.name}) doesn't appear to be a standard CV format. Please upload a PDF or Word document.`;
-          }
-
-          this.addMessage('bot', analysis);
-        }, 1500);
+        fetch('https://poc.phantomx.movoncreative.dev/api/v1/analyze-resume', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            this.hideLoading();
+            this.addMessage('bot', data.response || 'Analysis complete.');
+          })
+          .catch((error) => {
+            this.hideLoading();
+            this.addMessage(
+              'bot',
+              `An error occurred while analyzing your CV: ${error.message}`
+            );
+            console.error('Error in file upload:', error);
+          });
       }
     },
 
@@ -764,33 +856,91 @@
       this.elements.input.value = '';
       this.elements.sendButton.disabled = true;
 
-      // Simulate response
       this.showLoading();
 
-      setTimeout(() => {
-        this.hideLoading();
+      const payload = {
+        project_id: '94306f56-bfea-4c2e-9bca-192da231763a',
+        tenant_id: '4b672477-e2f0-4251-8b4f-5c1ee57b541b',
+        query: message,
+      };
 
-        let response = '';
+      fetch('https://phantomx.movoncreative.dev/api/v1/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.hideLoading();
+          if (data && data.answer) {
+            // Format response untuk lebih baik
+            const formattedResponse = this.formatBotResponse(data.answer);
+            this.addMessage('bot', formattedResponse);
+          } else {
+            this.addMessage(
+              'bot',
+              'I received a response, but it was empty or in an unexpected format. Please try again.'
+            );
+          }
+        })
+        .catch((error) => {
+          this.hideLoading();
+          this.addMessage(
+            'bot',
+            `An error occurred while processing your query: ${error.message}`
+          );
+          console.error('Error in sendMessage:', error);
+        });
+    },
 
-        if (
-          message.toLowerCase().includes('experience') ||
-          message.toLowerCase().includes('work')
-        ) {
-          response =
-            "When listing your work experience, use action verbs and quantify your achievements when possible. For example, instead of 'Responsible for managing team', write 'Led a team of 5 developers, increasing productivity by 20%'.";
-        } else if (message.toLowerCase().includes('education')) {
-          response =
-            'For your education section, list your most recent degree first. Include the institution name, degree obtained, field of study, and graduation date. If you had outstanding achievements, like graduating with honors, include those too.';
-        } else if (message.toLowerCase().includes('skill')) {
-          response =
-            "Organize your skills into categories (e.g., Technical Skills, Soft Skills, Languages). Tailor them to match the job description of positions you're applying for.";
-        } else {
-          response =
-            "I'm here to help with your CV. You can ask me about optimizing different sections, formatting tips, or industry-specific advice.";
-        }
+    // Helper function untuk format respons bot
+    formatBotResponse(response) {
+      if (!response) return '';
 
-        this.addMessage('bot', response);
-      }, 1000);
+      // Helper function untuk mendeteksi dan memformat numbered lists
+      const formatNumberedList = (text) => {
+        return text.replace(/(\d+\.\s+\*\*.*?\*\*:)/g, '\n$1');
+      };
+
+      // Helper function untuk memformat paragraf
+      const formatParagraphs = (text) => {
+        return text
+          .split('\n\n')
+          .map((paragraph) => paragraph.trim())
+          .join('\n\n');
+      };
+
+      // Helper function untuk memformat bold text
+      const formatBoldText = (text) => {
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      };
+
+      // Helper function untuk memformat italic text
+      const formatItalicText = (text) => {
+        return text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      };
+
+      // Main formatting process
+      let formattedText = response;
+
+      // Format numbered lists
+      formattedText = formatNumberedList(formattedText);
+
+      // Format paragraphs
+      formattedText = formatParagraphs(formattedText);
+
+      // Format bold and italic text
+      formattedText = formatBoldText(formattedText);
+      formattedText = formatItalicText(formattedText);
+
+      return formattedText;
     },
   };
 
