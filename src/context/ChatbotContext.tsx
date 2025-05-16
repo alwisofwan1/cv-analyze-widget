@@ -11,7 +11,7 @@ import {
   ChatbotContextType,
   Message,
   MessageType,
-  Language,
+  // Language,
   ThemeConfig,
 } from '../types/chatbot';
 import {
@@ -202,7 +202,7 @@ export const ChatbotProvider: React.FC<{
         return;
       }
 
-      const nextNodeId = getNextNode(selectedOption.action, state.language);
+      const nextNodeId = getNextNode(selectedOption.action);
 
       dispatch({ type: 'SET_TYPING', payload: true });
 
@@ -244,8 +244,8 @@ export const ChatbotProvider: React.FC<{
 
       const nextNodeId = processUserInput(
         text,
-        state.currentNodeId,
-        state.language
+        state.currentNodeId
+        // state.language
       );
 
       dispatch({ type: 'SET_TYPING', payload: true });

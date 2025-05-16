@@ -225,7 +225,7 @@ export const getConversationNodes = (language: Language): Record<string, Convers
 };
 
 // Process user input
-export const processUserInput = (input: string, nodeId: string, language: Language): string => {
+export const processUserInput = (input: string, nodeId: string,): string => {
   // This is a simplified implementation
   // In a real-world scenario, you might use NLP or more complex matching
 
@@ -262,7 +262,7 @@ export const handleRegistration = (): string => {
 };
 
 // Get next node based on option
-export const getNextNode = (optionId: string, language: Language): string => {
+export const getNextNode = (optionId: string): string => {
   switch (optionId) {
     case 'id':
       return 'main_menu';
