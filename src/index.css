@@ -26,3 +26,58 @@ code {
     transform: rotate(360deg);
   }
 }
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Typing animation */
+.typing-animation {
+  display: flex;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.typing-animation .dot {
+  width: 8px;
+  height: 8px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: typingAnimation 1.5s infinite ease-in-out;
+  will-change: transform;
+}
+
+.typing-animation .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-animation .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-animation .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
