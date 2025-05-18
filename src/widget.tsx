@@ -1,34 +1,26 @@
-// import { createRoot } from 'react-dom/client';
-// import { ChatbotWidget } from './components/ChatbotWidget';
-// import { DEFAULT_CONFIG } from './lib/constants';
-// import { sendMessage } from './lib/api';
-// import './styles/widget.css';
+import ReactDOM from 'react-dom/client';
+import { ChatbotProvider } from './context/ChatbotContext';
+import { ChatbotWidget } from './components/chatbot';
 
-// const widgetContainer = document.createElement('div');
-// widgetContainer.id = 'faq-chatbot-widget';
-// document.body.appendChild(widgetContainer);
+// Membuat Custom Element bernama <my-widget>
+class MyWidgetElement extends HTMLElement {
+  connectedCallback() {
+    const root = ReactDOM.createRoot(this);
+    root.render(
+      <ChatbotProvider
+        theme={{
+          primary: 'red-600',
+          secondary: 'red-700',
+          background: 'gray-50',
+          text: 'gray-800',
+          botBubble: 'white',
+          userBubble: 'red-600',
+        }}
+      >
+        <ChatbotWidget />
+      </ChatbotProvider>
+    );
+  }
+}
 
-// const root = createRoot(widgetContainer);
-
-// declare global {
-//   interface Window {
-//     FaqChatbot?: {
-//       init: (config: Record<string, unknown>) => void;
-//     };
-//   }
-// }
-
-// window.FaqChatbot = {
-//   init: (userConfig) => {
-//     const config = { ...DEFAULT_CONFIG, ...userConfig };
-
-//     root.render(
-//       <ChatbotWidget
-//         onSendMessage={(message: string) =>
-//           sendMessage(config.endpoint, message)
-//         }
-//         {...config}
-//       />
-//     );
-//   },
-// };
+customElements.define('my-widget', MyWidgetElement);

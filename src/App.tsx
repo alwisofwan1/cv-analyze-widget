@@ -1,4 +1,4 @@
-import { ChatbotWidget, ChatbotProvider } from './components/chatbot';
+// import { ChatbotWidget, ChatbotProvider } from './components/chatbot';
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
         </p>
       </div>
 
-      <ChatbotProvider
+      {/* <ChatbotProvider
         theme={{
           primary: 'red-600',
           secondary: 'red-700',
@@ -33,7 +33,7 @@ function App() {
         }}
       >
         <ChatbotWidget />
-      </ChatbotProvider>
+      </ChatbotProvider> */}
     </div>
   );
 }

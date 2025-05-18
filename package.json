@@ -3,11 +3,23 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/faq-chatbot.umd.js",
+  "module": "./dist/faq-chatbot.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/faq-chatbot.es.js",
+      "require": "./dist/faq-chatbot.umd.js"
+    }
+  },
   "scripts": {
     "dev": "bunx --bun vite",
     "build": "bunx --bun tsc -b && bunx --bun vite build",
     "lint": "bunx --bun eslint .",
-    "preview": "bunx --bun vite preview"
+    "preview": "bunx --bun vite preview",
+    "serve-widget": "vite build && vite preview --port 5173"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.9",
@@ -16,10 +28,12 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.9",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "vite-plugin-singlefile": "^2.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/node": "^22.15.18",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/uuid": "^10.0.0",

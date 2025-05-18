@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,6 +9,28 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- <script src='http://localhost:5173/widget.js'></script> -->
+      <!-- Load the widget script -->
+    <script src="http://localhost:5173/my-widget.js"></script>
+
+    <my-widget></my-widget>
+    
+    <!-- Initialize the widget -->
+    <!-- <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Make sure the widget has loaded
+        setTimeout(function() {
+          if (window.FaqChatbot) {
+            window.FaqChatbot.init({
+              primary: 'blue-600',
+              secondary: 'blue-700',
+              background: 'gray-50',
+              text: 'gray-800'
+            });
+          } else {
+            console.error('FaqChatbot widget not loaded properly');
+          }
+        }, 1000); // Give some time for the script to load
+      });
+    </script> -->
   </body>
 </html>
