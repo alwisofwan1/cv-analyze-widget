@@ -15,7 +15,6 @@ export default defineConfig({
       fileName: () => 'my-widget.js',
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
       output: {
         globals: {
           react: 'React',

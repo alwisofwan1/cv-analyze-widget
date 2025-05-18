@@ -2,10 +2,20 @@ import ReactDOM from 'react-dom/client';
 import { ChatbotProvider } from './context/ChatbotContext';
 import { ChatbotWidget } from './components/chatbot';
 
-// Membuat Custom Element bernama <my-widget>
 class MyWidgetElement extends HTMLElement {
   connectedCallback() {
-    const root = ReactDOM.createRoot(this);
+    // Gunakan Shadow DOM agar widget terisolasi
+    const shadow = this.attachShadow({ mode: 'open' });
+
+    // Mount point React
+    const mountPoint = document.createElement('div');
+    shadow.appendChild(mountPoint);
+    const style = document.createElement('style');
+    style.textContent = `@tailwind base; @tailwind components; @tailwind utilities;`; // Atau CSS hasil build
+    shadow.appendChild(style);
+
+    const root = ReactDOM.createRoot(mountPoint);
+
     root.render(
       <ChatbotProvider
         theme={{
